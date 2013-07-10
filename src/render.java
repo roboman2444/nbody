@@ -25,7 +25,7 @@ public class render extends nbody {
 			e.printStackTrace();
 		}
 		resizeDisplay();
-		
+
 	}
 	public static void resizeDisplay(){
 		sizeX = Display.getWidth();
@@ -77,7 +77,7 @@ public class render extends nbody {
 		GL11.glMatrixMode(GL11.GL_PROJECTION);// Select The Projection Matrix
 		GL11.glLoadIdentity();// Reset The Projection Matrix
 		if(nbody.ortho)GL11.glOrtho(0, 800, 0, 600, 1, -1);
-		else gluPerspective(camera.fov,(float)x/(float)y, 0f,100.0f);
+		else gluPerspective(camera.fov,(float)x/(float)y, 0.1f,100.0f);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);                     // Select The Modelview Matrix
 		GL11.glLoadIdentity();                           // Reset The Modelview Matrix
 		GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
