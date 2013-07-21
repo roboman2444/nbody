@@ -48,6 +48,7 @@ public class nbody{
 		System.setProperty("org.lwjgl.librarypath", new File("libs/lin").getAbsolutePath());
 		startParticles(Integer.parseInt(args[0]));
 		render.init();
+		input.initInput();
 		long lasttime = System.currentTimeMillis();
 
 		//cache all parameters so we only have to do the math once

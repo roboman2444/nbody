@@ -48,10 +48,7 @@ public class gamecode {
 		} else pauseReleased = true;
 		if(input.keyM){
 			if(mReleased){
-				if(input.snapMouse) input.initInput();
-				input.snapMouse = !input.snapMouse;
-				input.mouseDeltaX = 0;
-				input.mouseDeltaY = 0;
+				input.toggleMouseSnap();
 			}
 			mReleased = false;
 		} else mReleased = true;
