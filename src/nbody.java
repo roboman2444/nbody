@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Random;
 
@@ -35,29 +37,34 @@ public class nbody{
 	public static void main(String[] args){
 		startParticles(Integer.parseInt(args[0]));
 		render.init();
-		/*try {
-			openclsolver.doSumExample();
-		} catch (LWJGLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}*/
 		long lasttime = System.currentTimeMillis();
-		thread[] t = new thread[threads];
+
+		//cache all parameters so we only have to do the math once
+		final ArrayList<Integer> cache_parameter1 = new ArrayList<Integer>();
+		final ArrayList<Integer> cache_parameter2 = new ArrayList<Integer>();
+		for (int i = 0; i < threads; i++) {
+		    cache_parameter1.add((numberofparticles/threads) * i);
+		    cache_parameter2.add((numberofparticles/threads) * (i+1));
+		}
+		
 		while(true){
 			long time = System.currentTimeMillis();
 			timescale = (time-lasttime)/100.0f;
 			if(!paused){
-				for (int i =0; i< threads; i++) {
-					t[i] = new thread((numberofparticles/threads) * i,(numberofparticles/threads) * (i+1));
-					t[i].start();
-				}
-				for (thread th : t) {
-					try {
-						th.join();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
+			    Parallel.parallelFor(cache_parameter1, new Parallel.ParallelRunner<Integer>() {
+
+                    @Override
+                    public void run(Integer object, int index) {
+                        int start = object.intValue();
+                        int end = cache_parameter2.get(index);
+                        
+                        for(int i=start; i< end; i++){
+                            ParticleArray.getnBodyVelocityChange(nbody.timescale, i);
+                        }
+                    }
+			        
+			    }, threads);
+			    
 				doMath((float)timescale);
 			}
 			render.draw();
