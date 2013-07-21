@@ -1,9 +1,12 @@
+import java.util.ArrayList;
+
 public class waterphysics extends nbody {
 	private float posx,posy,posz;
 	private float velx,vely,velz;
 	private float pressurex, pressurey, pressurez;
 	private float pressure2x, pressure2y, pressure2z;
 	private float pressure;
+	private ArrayList<waterphysics> waterparticulate = new ArrayList<waterphysics>();
 	
 		waterphysics(){
 			//spawnParticleGalaxy();
@@ -37,7 +40,7 @@ public class waterphysics extends nbody {
 			if(posy < 0) pressure2y =  10;
 			if(posz > 1) pressure2z = -10;
 			if(posz < 0) pressure2z =  10;
-			//pressure
+            //pressure
 			for(int i=0; i< waterparticulate.size(); i++){
 				if(waterparticulate.get(i) == this) continue;
 				float deltax, deltay, deltaz, distance;
