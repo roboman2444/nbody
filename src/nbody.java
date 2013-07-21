@@ -1,13 +1,24 @@
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.Random;
-
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.Display;
+import java.util.Locale;
 
 
 public class nbody{
+    static {
+        String lwjgl_folder = "libs" + File.separator;
+        final String OS = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+
+        if (OS.contains("win"))
+            lwjgl_folder += "win";
+        else if (OS.contains("mac"))
+            lwjgl_folder += "osx";
+        else if (OS.contains("nix") || OS.contains("nux") || OS.contains("aix"))
+            lwjgl_folder += "lin";
+        else if (OS.contains("sunos"))
+            lwjgl_folder += "sol";
+        System.setProperty("org.lwjgl.librarypath", new File(lwjgl_folder).getAbsolutePath());
+    }
+    
 	public static final boolean LINES = false;
 	public static final int threads = 8;
 	public static int numberofparticles;
@@ -37,29 +48,34 @@ public class nbody{
 		System.setProperty("org.lwjgl.librarypath", new File("libs/lin").getAbsolutePath());
 		startParticles(Integer.parseInt(args[0]));
 		render.init();
-		/*try {
-			openclsolver.doSumExample();
-		} catch (LWJGLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}*/
 		long lasttime = System.currentTimeMillis();
-		thread[] t = new thread[threads];
+
+		//cache all parameters so we only have to do the math once
+		final ArrayList<Integer> cache_parameter1 = new ArrayList<Integer>();
+		final ArrayList<Integer> cache_parameter2 = new ArrayList<Integer>();
+		for (int i = 0; i < threads; i++) {
+		    cache_parameter1.add((numberofparticles/threads) * i);
+		    cache_parameter2.add((numberofparticles/threads) * (i+1));
+		}
+		
 		while(true){
 			long time = System.currentTimeMillis();
 			timescale = (time-lasttime)/100.0f;
 			if(!paused){
-				for (int i =0; i< threads; i++) {
-					t[i] = new thread((numberofparticles/threads) * i,(numberofparticles/threads) * (i+1));
-					t[i].start();
-				}
-				for (thread th : t) {
-					try {
-						th.join();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
+			    Parallel.parallelFor(cache_parameter1, new Parallel.ParallelRunner<Integer>() {
+
+                    @Override
+                    public void run(Integer object, int index) {
+                        int start = object.intValue();
+                        int end = cache_parameter2.get(index);
+                        
+                        for(int i=start; i< end; i++){
+                            ParticleArray.getnBodyVelocityChange(nbody.timescale, i);
+                        }
+                    }
+			        
+			    }, threads);
+			    
 				doMath((float)timescale);
 			}
 			render.draw();
