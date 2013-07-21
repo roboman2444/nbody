@@ -1,14 +1,24 @@
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Scanner;
-import java.util.Random;
-
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.Display;
+import java.util.Locale;
 
 
 public class nbody{
+    static {
+        String lwjgl_folder = "libs" + File.separator;
+        final String OS = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+
+        if (OS.contains("win"))
+            lwjgl_folder += "win";
+        else if (OS.contains("mac"))
+            lwjgl_folder += "osx";
+        else if (OS.contains("nix") || OS.contains("nux") || OS.contains("aix"))
+            lwjgl_folder += "lin";
+        else if (OS.contains("sunos"))
+            lwjgl_folder += "sol";
+        System.setProperty("org.lwjgl.librarypath", new File(lwjgl_folder).getAbsolutePath());
+    }
+    
 	public static final boolean LINES = false;
 	public static final int threads = 4;
 	public static int numberofparticles;
