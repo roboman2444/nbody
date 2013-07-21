@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Random;
@@ -8,7 +9,7 @@ import org.lwjgl.opengl.Display;
 
 public class nbody{
 	public static final boolean LINES = false;
-	public static final int threads = 4;
+	public static final int threads = 8;
 	public static int numberofparticles;
 	public static final boolean docoolshit = false;
 	public static final boolean ortho = false;
@@ -33,6 +34,7 @@ public class nbody{
 		ParticleArray.spawnSun(1);
 	}
 	public static void main(String[] args){
+		System.setProperty("org.lwjgl.librarypath", new File("libs/lin").getAbsolutePath());
 		startParticles(Integer.parseInt(args[0]));
 		render.init();
 		/*try {
