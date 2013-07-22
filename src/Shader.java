@@ -16,17 +16,21 @@ public class Shader{
 	private static ArrayList<String> findShaders(File dir){
 		//if(!dir.isDirectory()) return null; // returning null kinda borks some stuff
 		File[] files = dir.listFiles();
-		ArrayList<String> returnnames = new ArrayList();
-		/*for(int i = 0; i < files.length; i++){
+		ArrayList<String> returnnames = new ArrayList<String>();
+		/*
+		for(int i = 0; i < files.length; i++){
+		
 			if(!files[i].getName().contains(".frag")){
 				continue;
 			}
 			i++;
+			if(i==files.length) continue;
 			if(!files[i].getName().contains(".vert")){
 				continue;
 			}
 			returnnames.add(files[i].getName().split(".vert")[0]);
-		}*/
+		}
+		*/
 		return returnnames;	//this should return an ArrayList of 0 length if none, which is what i wanted
 	}
 	public static void initShader(){

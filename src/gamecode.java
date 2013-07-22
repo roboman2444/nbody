@@ -1,14 +1,14 @@
-import org.lwjgl.input.Keyboard;
+
 
 public class gamecode {
 	public static float makeVectorsX;
 	public static float makeVectorsY;
 	public static float makeVectorsZ;
-	private static boolean pauseReleased, mReleased, fReleased;
+	private static boolean pauseReleased, mReleased, fReleased, pReleased, cReleased;
 	private static float mouseSensitivity = 0.1f;
 	public static void run(){
-		render.ppwhatx += (float)Math.random();
-		render.ppwhaty += (float)Math.random();
+		render.ppwhatx += 1f * nbody.timescale;
+		render.ppwhaty += 2f * nbody.timescale;
 		camera.rotz -= input.mouseDeltaX*mouseSensitivity;
 		camera.rotx += input.mouseDeltaY*mouseSensitivity;
 		if(camera.rotx > 90) camera.rotx = 90;
@@ -52,6 +52,20 @@ public class gamecode {
 			}
 			mReleased = false;
 		} else mReleased = true;
+		
+		if(input.keyP){
+			if(pReleased){
+				render.PostProcessEnabled = !render.PostProcessEnabled;
+			}
+			pReleased = false;
+		} else pReleased = true;
+		
+		if(input.keyC){
+			if(cReleased){
+				render.PostProcessCube = !render.PostProcessCube;
+			}
+			cReleased = false;
+		} else cReleased = true;
 		
 		if(input.keyF){
 			if(fReleased){

@@ -3,7 +3,7 @@ import org.lwjgl.input.Mouse;
 
 
 public class input {
-	public static boolean keyW, keyA, keyS, keyD, keyESC, keySPACE, keyM, keyF;
+	public static boolean keyW, keyA, keyS, keyD, keyESC, keySPACE, keyM, keyF, keyP, keyC;
 
 	public static int mouseDeltaX = 0;
 	public static int mouseDeltaY = 0;
@@ -30,6 +30,8 @@ public class input {
 					case Keyboard.KEY_M:	 keyM	= true; break;
 					case Keyboard.KEY_SPACE: keySPACE=true; break;
 					case Keyboard.KEY_F:	 keyF	= true; break;
+					case Keyboard.KEY_P:	 keyP	= true; break;
+					case Keyboard.KEY_C:	 keyC	= true; break;
 				}
 			}
 			else {
@@ -42,6 +44,8 @@ public class input {
 					case Keyboard.KEY_M:	 keyM	= false; break;
 					case Keyboard.KEY_SPACE: keySPACE=false; break;
 					case Keyboard.KEY_F:	 keyF	= false; break;
+					case Keyboard.KEY_P:	 keyP	= false; break;
+					case Keyboard.KEY_C:	 keyC	= false; break;
 				}
 			}
 		}

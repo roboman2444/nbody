@@ -91,13 +91,10 @@ public class ParticleArray {
 			deltaz = posz[p] - posz[i];
 			//distance =  (float) Math.sqrt(Math.pow(deltax, 2)+Math.pow(deltay, 2)+Math.pow(deltaz, 2)); // shits SLOW 
 			distance =  (float) Math.sqrt((deltax * deltax)+(deltay*deltay)+(deltaz*deltaz));
-			acceleration = (mass[i] / (distance))/10000000/*/mass[p]*/;
+			acceleration = (mass[i] / (distance))/10000000;
 			velx[p] -= (deltax/distance) * acceleration;
 			vely[p] -= (deltay/distance) * acceleration;
 			velz[p] -= (deltaz/distance) * acceleration;
-
-			
-			
 		}
 	}
 	
