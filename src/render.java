@@ -51,8 +51,8 @@ public class render extends nbody {
 		//set up texture
 		colorTextureID = GL11.glGenTextures();
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, colorTextureID);
-		   GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
-		   GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+		   //GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+		  // GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
 		   GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 		   GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, sizeX, sizeY, 0,GL11.GL_RGBA, GL11.GL_INT, (java.nio.ByteBuffer) null);
@@ -96,6 +96,10 @@ public class render extends nbody {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);                     // Select The Modelview Matrix
 		GL11.glLoadIdentity();                           // Reset The Modelview Matrix
 		GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
+		
+		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, colorTextureID);
+		//GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, sizeX, sizeY, 0,GL11.GL_RGBA, GL11.GL_INT, (java.nio.ByteBuffer) null);
+		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
 	}
 	private static void drawPixel2 (float x , float y, float z, float size){
@@ -352,15 +356,23 @@ public class render extends nbody {
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // backbuffer
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, colorTextureID);
 
-		GL11.glClearColor (0.0f, 0.0f, 0.0f, 0.5f);
-		GL11.glClear (GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+
 		GL11.glColor3f(1.0f,1.0f,1.0f);
-		if(PostProcessCube)drawFSQuad();
-		else drawParticles2();
+		if(PostProcessCube){
+			GL11.glClearColor (1.0f, 1.0f, 1.0f, 0.5f);
+			GL11.glClear (GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+			drawFSQuad();
+		}
+		else{
+			GL11.glClearColor (0.0f, 0.0f, 0.0f, 0.5f);
+			GL11.glClear (GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+			drawParticles2();
+		}
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		//GL11.glFlush();
-		//gluPerspective(camera.fov,(float)sizeX/(float)sizeY, 0f,100.0f);
-	}
+		GL11.glEnable(GL11.GL_BLEND);
+		//GL11.glDepthFunc(GL11.GL_LEQUAL);
+		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
+		}
 	public static void draw() {
 		//GL11.glLoadIdentity();
 		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);

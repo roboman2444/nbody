@@ -45,7 +45,6 @@ public class nbody{
 		ParticleArray.spawnSun(1);
 	}
 	public static void main(String[] args){
-		System.setProperty("org.lwjgl.librarypath", new File("libs/lin").getAbsolutePath());
 		startParticles(Integer.parseInt(args[0]));
 		render.init();
 		input.initInput();
