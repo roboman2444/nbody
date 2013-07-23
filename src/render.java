@@ -346,17 +346,18 @@ public class render extends nbody {
 
 	}
 	private static void PostProcess(){
-		//GL11.glViewport (0, 0, 800, 600);
-		//GL11.glOrtho(0, 800, 0, 600, 1, -1);//postprocessing in in ortho
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_BLEND);
 		//GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glEnable(GL11.GL_DEPTH_TEST); // depth testing, yo
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // backbuffer
+
+		//GL20.glBindAttribLocation(Shader.shaders.get("shader"), 0, "texCoord");
+		GL20.glUseProgram(Shader.shaders.get("shader"));
+		GL13.glActiveTexture(GL13.GL_TEXTURE0);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, colorTextureID);
-
-
+		
 		GL11.glColor3f(1.0f,1.0f,1.0f);
 		if(PostProcessCube){
 			GL11.glClearColor (1.0f, 1.0f, 1.0f, 0.5f);
@@ -372,6 +373,7 @@ public class render extends nbody {
 		GL11.glEnable(GL11.GL_BLEND);
 		//GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
+		GL20.glUseProgram(0);
 		}
 	public static void draw() {
 		//GL11.glLoadIdentity();
