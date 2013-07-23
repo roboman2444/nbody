@@ -14,23 +14,23 @@ import org.lwjgl.opengl.GL11;
 public class Shader{
 	public static HashMap<String, Integer> shaders = new HashMap<String, Integer>();
 	private static ArrayList<String> findShaders(File dir){
-		//if(!dir.isDirectory()) return null; // returning null kinda borks some stuff
+		if(!dir.isDirectory()) return null; // returning null kinda borks some stuff
+		//System.out.println("jiggles");
 		File[] files = dir.listFiles();
 		ArrayList<String> returnnames = new ArrayList<String>();
-		/*
-		for(int i = 0; i < files.length; i++){
 		
-			if(!files[i].getName().contains(".frag")){
+		for(int fragi = 0; fragi < files.length; fragi++){
+			//find a frag file
+			if(!files[fragi].getName().contains(".frag")){
 				continue;
 			}
-			i++;
-			if(i==files.length) continue;
-			if(!files[i].getName().contains(".vert")){
-				continue;
+			String fileName = files[fragi].getName().split(".frag")[0];
+			//find its accompanying vert file
+			for(int verti = 0; verti < files.length; verti++){
+				if(files[verti].getName().equals(fileName + ".vert")) 
+					returnnames.add(fileName);
 			}
-			returnnames.add(files[i].getName().split(".vert")[0]);
 		}
-		*/
 		return returnnames;	//this should return an ArrayList of 0 length if none, which is what i wanted
 	}
 	public static void initShader(){
