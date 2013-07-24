@@ -4,11 +4,9 @@ import static org.lwjgl.util.glu.GLU.*;
 import static org.lwjgl.opengl.EXTFramebufferObject.*;
 
 public class render extends nbody {
-	static int colorTextureID;
-	static int framebufferID;
-	static int depthRenderBufferID;
 	public static boolean PostProcessEnabled = false;
 	public static boolean PostProcessCube = false;
+	public static boolean PostProcessBloom = false;
 	public static int sizeX = 800;
 	public static int sizeY = 600;
 	public static float ppwhatx = 0;
@@ -30,6 +28,10 @@ public class render extends nbody {
 		//System.out.println("resized to " + sizeX +" " + sizeY);
 	}
 	public static void init () {
+		
+		//how do i get a framebuffer by name?
+		//ok
+		
 		try {
 			Display.setDisplayMode(new DisplayMode(sizeX,sizeY));
 			Display.create();
@@ -39,50 +41,19 @@ public class render extends nbody {
 			e.printStackTrace();
 			System.exit(0);
 		}
-
+		
 		Shader.initShader();
+		Framebuffer.initFramebuffers();
 		// init OpenGL
-		resizeDisplay();
+		
 		GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA,GL11.GL_ONE);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glShadeModel (GL11.GL_SMOOTH);
-		//set up texture
-		colorTextureID = GL11.glGenTextures();
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, colorTextureID);
-		   //GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
-		  // GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-		   GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-		   GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, sizeX, sizeY, 0,GL11.GL_RGBA, GL11.GL_INT, (java.nio.ByteBuffer) null);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-		
-		//set up fbo
-		framebufferID = glGenFramebuffersEXT();
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebufferID);
-		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL11.GL_TEXTURE_2D, colorTextureID, 0); //attach to fbo
-		
-		// initialize depth renderbuffer
-		//depthRenderBufferID = glGenFramebuffersEXT();
-		//glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depthRenderBufferID);                // bind the depth renderbuffer
-		//glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL14.GL_DEPTH_COMPONENT24, 512, 512); // get the data space for it
-		//glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_RENDERBUFFER_EXT, depthRenderBufferID); // attach to fbo
 		
 		
-		//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebufferID);
-
-		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, colorTextureID);
-		//GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);               // make it linear filterd
-		//GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, sizeX, sizeY, 0,GL11.GL_RGBA, GL11.GL_INT, (java.nio.ByteBuffer) null);  // Create the texture data
-		//glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL11.GL_TEXTURE_2D, colorTextureID, 0);	
-
-		// initialize depth renderbuffer
-		//glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depthRenderBufferID);                // bind the depth renderbuffer
-		//glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL14.GL_DEPTH_COMPONENT24, 512, 512); // get the data space for it
-		//glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT,GL_RENDERBUFFER_EXT, depthRenderBufferID); // bind it to the renderbuffer
-
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);                                    // Swithch back to normal framebuffer rendering
+		resizeDisplay();
 	}
 	private static void resizeWindow(int x, int y){
 		if(x==0)x=1;
@@ -97,9 +68,8 @@ public class render extends nbody {
 		GL11.glLoadIdentity();                           // Reset The Modelview Matrix
 		GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
 		
-		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, colorTextureID);
-		//GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, sizeX, sizeY, 0,GL11.GL_RGBA, GL11.GL_INT, (java.nio.ByteBuffer) null);
-		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+		//Framebuffer.framebufferList.get("postprocess1").resizeFramebuffer(x, y);
+		//Framebuffer.framebufferList.get("postprocess2").resizeFramebuffer(x, y);
 
 	}
 	private static void drawPixel2 (float x , float y, float z, float size){
@@ -222,35 +192,8 @@ public class render extends nbody {
 		}
 
 	}
-	private static void drawVoxels(){
-		//ARBShaderObjects.glUseProgramObjectARB(Shader.shaders.get("shader"));
 
-
-		for(int x=0; x<256; x++){
-			for(int y=0; y<256; y++){
-				for(int z=0; z<256; z++){
-					if(voxelize.voxelSize[x][y][z] == 0)continue;
-					float size = voxelize.voxelSize[x][y][z]/256f;
-					float nx = (float)x/256.0f;
-					float ny = (float)y/256.0f;
-					float nz = (float)z/256.0f;
-					//System.out.println("x:"+nx+" y:"+ ny + " z:" + nz + " size:" + size);
-
-					GL11.glColor3f(1f,0,0);
-
-					GL11.glBegin(GL11.GL_QUADS);
-					GL11.glVertex3f(nx -size, ny -size, nz + size);
-					GL11.glVertex3f(nx +size, ny -size, nz + size);
-					GL11.glVertex3f(nx +size, ny +size, nz + size);
-					GL11.glVertex3f(nx -size, ny +size, nz + size);
-					GL11.glEnd();
-
-				}
-			}
-		}
-
-	}
-	private static void drawFSQuad(){
+	private static void drawRotatingCube(){
 		GL11.glLoadIdentity();
 		translateCrap(0f, -5f, 0f);
 		rotateCrap(ppwhatx, ppwhaty, 0f);
@@ -345,57 +288,95 @@ public class render extends nbody {
 
 
 	}
+	
+	private static void drawFSQuad(){
+		//GL11.glOrtho(-1, 1, -1, 1, 0.1, 1); //maybe change
+		GL11.glLoadIdentity();
+		translateCrap(0f, -2f, 0f);
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glTexCoord2f(0.0f, 0.0f);
+			GL11.glVertex3f(-1,-1, 0.5f);
+			GL11.glTexCoord2f(1.0f, 0.0f);
+			GL11.glVertex3f(1,-1, 0.5f);
+			GL11.glTexCoord2f(1.0f, 1.0f);
+			GL11.glVertex3f(1,1, 0.5f);
+			GL11.glTexCoord2f(0.0f, 1.0f);
+			GL11.glVertex3f(-1,1, 0.5f);
+		GL11.glEnd();	
+	}
+	
+	private static void Bloom(){
+
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_BLEND);
+		
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp2").framebufferID);
+		GL20.glUseProgram(Shader.shaders.get("gaush"));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp1").textureID);
+		drawFSQuad();
+		
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp3").framebufferID);
+		GL20.glUseProgram(Shader.shaders.get("gausv"));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp2").textureID);
+		drawFSQuad();
+		
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp4").framebufferID);
+		GL20.glUseProgram(Shader.shaders.get("gaush"));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp3").textureID);
+		drawFSQuad();
+		
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		GL20.glUseProgram(Shader.shaders.get("gausv"));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp4").textureID);
+		drawFSQuad();
+		
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL20.glUseProgram(0);
+	}
 	private static void PostProcess(){
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_BLEND);
-		//GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glEnable(GL11.GL_DEPTH_TEST); // depth testing, yo
 
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // backbuffer
 
-		//GL20.glBindAttribLocation(Shader.shaders.get("shader"), 0, "texCoord");
-		GL20.glUseProgram(Shader.shaders.get("shader"));
-		GL13.glActiveTexture(GL13.GL_TEXTURE0);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, colorTextureID);
-		
-		GL11.glColor3f(1.0f,1.0f,1.0f);
+		GL20.glUseProgram(Shader.shaders.get("gaush"));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp1").textureID);
 		if(PostProcessCube){
 			GL11.glClearColor (1.0f, 1.0f, 1.0f, 0.5f);
 			GL11.glClear (GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-			drawFSQuad();
+			drawRotatingCube();
 		}
 		else{
 			GL11.glClearColor (0.0f, 0.0f, 0.0f, 0.5f);
 			GL11.glClear (GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			drawParticles2();
 		}
+		
+		
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_BLEND);
-		//GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
 		GL20.glUseProgram(0);
+		
+		
 		}
 	public static void draw() {
-		//GL11.glLoadIdentity();
-		//GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-		if(PostProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebufferID);
-		//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		if(PostProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp1").framebufferID);
 
+		gluPerspective(camera.fov,(float)sizeX/(float)sizeY, 0.1f,100.0f);
 		GL11.glClearColor (0.0f, 0.0f, 0.0f, 0.5f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		//GL11.glTranslatef(0.0f,0.0f,-6.0f); 
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);//just fo shitsngiggles
 		GL11.glLoadIdentity();// again, for shitsngiggles
 		camera.AdjustToCamera();
-		//GL11.glPopMatrix();
-		//GL11.glPushMatrix();
-		//GL11.glDisable(GL11.GL_BLEND);GL11.glEnable(GL11.GL_DEPTH_TEST);
-		//voxelize.voxelize();
-		//drawVoxels();
-		//GL11.glDisable(GL11.GL_DEPTH_TEST);GL11.glEnable(GL11.GL_BLEND);
 		drawParticles();
 		
-		if(PostProcessEnabled)PostProcess();
+		if(PostProcessEnabled){
+			if(PostProcessBloom) Bloom();
+			else PostProcess();
+		}
 		if(Display.wasResized())resizeDisplay();
 		Display.update();
 		

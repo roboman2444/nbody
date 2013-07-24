@@ -4,7 +4,7 @@ public class gamecode {
 	public static float makeVectorsX;
 	public static float makeVectorsY;
 	public static float makeVectorsZ;
-	private static boolean pauseReleased, mReleased, fReleased, pReleased, cReleased;
+	private static boolean pauseReleased, mReleased, fReleased, pReleased, cReleased, bReleased;
 	private static float mouseSensitivity = 0.1f;
 	public static void run(){
 		render.ppwhatx += 1f * nbody.timescale;
@@ -66,6 +66,13 @@ public class gamecode {
 			}
 			cReleased = false;
 		} else cReleased = true;
+		
+		if(input.keyB){
+			if(bReleased){
+				render.PostProcessBloom = !render.PostProcessBloom;
+			}
+			bReleased = false;
+		} else bReleased = true;
 		
 		if(input.keyF){
 			if(fReleased){
