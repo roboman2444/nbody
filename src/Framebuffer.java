@@ -36,7 +36,12 @@ public class Framebuffer {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		width = x;
 		height = y;
-		//todo error checking
+		/*//todo error checking
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebufferID);
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL11.GL_TEXTURE_2D, 0, 0); //attach to fbo
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT,GL11.GL_TEXTURE_2D, textureID, 0); //attach to fbo
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);//unbind
+		*/
 		return 1;
 
 	}
@@ -45,6 +50,7 @@ public class Framebuffer {
 		framebufferList.put("pp2", new Framebuffer(render.sizeX, render.sizeY));
 		framebufferList.put("pp3", new Framebuffer(render.sizeX, render.sizeY));
 		framebufferList.put("pp4", new Framebuffer(render.sizeX, render.sizeY));
+		framebufferList.put("pp5", new Framebuffer(render.sizeX, render.sizeY));
 
 	}
 }

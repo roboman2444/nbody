@@ -36,7 +36,7 @@ public class render extends nbody {
 			Display.setDisplayMode(new DisplayMode(sizeX,sizeY));
 			Display.create();
 			Display.setResizable(true);
-			resizeDisplay();
+			//resizeDisplay();
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -62,14 +62,16 @@ public class render extends nbody {
 		GL11.glViewport(0, 0, x, y); 
 		GL11.glMatrixMode(GL11.GL_PROJECTION);// Select The Projection Matrix
 		GL11.glLoadIdentity();// Reset The Projection Matrix
-		if(nbody.ortho)GL11.glOrtho(0, 800, 0, 600, 1, -1);
-		else gluPerspective(camera.fov,(float)x/(float)y, 0.1f,100.0f);
+		gluPerspective(camera.fov,(float)x/(float)y, 0.1f,100.0f);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);                     // Select The Modelview Matrix
 		GL11.glLoadIdentity();                           // Reset The Modelview Matrix
 		GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
 		
-		//Framebuffer.framebufferList.get("postprocess1").resizeFramebuffer(x, y);
-		//Framebuffer.framebufferList.get("postprocess2").resizeFramebuffer(x, y);
+		Framebuffer.framebufferList.get("pp1").resizeFramebuffer(x, y);
+		Framebuffer.framebufferList.get("pp2").resizeFramebuffer(x, y);
+		Framebuffer.framebufferList.get("pp3").resizeFramebuffer(x, y);
+		Framebuffer.framebufferList.get("pp4").resizeFramebuffer(x, y);
+		Framebuffer.framebufferList.get("pp5").resizeFramebuffer(x, y);
 
 	}
 	private static void drawPixel2 (float x , float y, float z, float size){
@@ -194,7 +196,7 @@ public class render extends nbody {
 	}
 
 	private static void drawRotatingCube(){
-		GL11.glLoadIdentity();
+		
 		translateCrap(0f, -5f, 0f);
 		rotateCrap(ppwhatx, ppwhaty, 0f);
 		/*
@@ -290,7 +292,6 @@ public class render extends nbody {
 	}
 	
 	private static void drawFSQuad(){
-		//GL11.glOrtho(-1, 1, -1, 1, 0.1, 1); //maybe change
 		GL11.glLoadIdentity();
 		translateCrap(0f, -2f, 0f);
 		GL11.glBegin(GL11.GL_QUADS);
@@ -306,9 +307,11 @@ public class render extends nbody {
 	}
 	
 	private static void Bloom(){
+		switchToOrtho();
 
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_BLEND);
+		GL11.glEnable(GL11.GL_DEPTH_TEST); // depth testing, yo
 		
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp2").framebufferID);
 		GL20.glUseProgram(Shader.shaders.get("gaush"));
@@ -325,57 +328,61 @@ public class render extends nbody {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp3").textureID);
 		drawFSQuad();
 		
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		if(PostProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp5").framebufferID);
+		else glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 		GL20.glUseProgram(Shader.shaders.get("gausv"));
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp4").textureID);
 		drawFSQuad();
 		
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		
 		GL11.glEnable(GL11.GL_BLEND);
 		GL20.glUseProgram(0);
+		GL11.glColor3f(1f, 1f, 1f);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp1").textureID);
+		drawFSQuad();
 	}
 	private static void PostProcess(){
+		switchToPerspective();
+		GL11.glColor3f(1f, 1f, 1f);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glEnable(GL11.GL_DEPTH_TEST); // depth testing, yo
-
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // backbuffer
-
-		GL20.glUseProgram(Shader.shaders.get("gaush"));
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp1").textureID);
+		GL20.glUseProgram(0);
+		if(PostProcessBloom)GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp5").textureID);
+		else GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp1").textureID);
+		GL11.glLoadIdentity();
 		if(PostProcessCube){
 			GL11.glClearColor (1.0f, 1.0f, 1.0f, 0.5f);
 			GL11.glClear (GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			drawRotatingCube();
 		}
 		else{
+			camera.AdjustToCamera();
 			GL11.glClearColor (0.0f, 0.0f, 0.0f, 0.5f);
 			GL11.glClear (GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			drawParticles2();
 		}
-		
-		
+		}
+	public static void draw() {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
 		GL20.glUseProgram(0);
 		
-		
-		}
-	public static void draw() {
-		if(PostProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp1").framebufferID);
-
-		gluPerspective(camera.fov,(float)sizeX/(float)sizeY, 0.1f,100.0f);
+		switchToPerspective();
+		if(PostProcessEnabled|| PostProcessBloom)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp1").framebufferID);
+		else glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 		GL11.glClearColor (0.0f, 0.0f, 0.0f, 0.5f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);//just fo shitsngiggles
+		//GL11.glMatrixMode(GL11.GL_MODELVIEW);//just fo shitsngiggles
 		GL11.glLoadIdentity();// again, for shitsngiggles
 		camera.AdjustToCamera();
 		drawParticles();
 		
+		if(PostProcessBloom) Bloom();
 		if(PostProcessEnabled){
-			if(PostProcessBloom) Bloom();
-			else PostProcess();
+			PostProcess();
 		}
 		if(Display.wasResized())resizeDisplay();
 		Display.update();
@@ -385,6 +392,20 @@ public class render extends nbody {
 
 	public static void translateCrap(float x, float y, float z){
 		GL11.glTranslatef(x, z, y);
+	}
+	public static void switchToPerspective(){
+		GL11.glMatrixMode(GL11.GL_PROJECTION);// Select The Projection Matrix
+		GL11.glLoadIdentity();// Reset The Projection Matrix
+		gluPerspective(camera.fov,(float)sizeX/(float)sizeY, 0.1f,100.0f);
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);                     // Select The Modelview Matrix
+		GL11.glLoadIdentity();                           // Reset The Modelview Matrix
+	}
+	public static void switchToOrtho(){
+		GL11.glMatrixMode(GL11.GL_PROJECTION);// Select The Projection Matrix
+		GL11.glLoadIdentity();// Reset The Projection Matrix
+		GL11.glOrtho(-1, 1, -1, 1, 0.1, 100); //maybe change
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);                     // Select The Modelview Matrix
+		GL11.glLoadIdentity();                           // Reset The Modelview Matrix
 	}
 	public static void rotateCrap(float roll, float yaw, float pitch){
 		GL11.glRotatef(roll, 0, 0, 1);
