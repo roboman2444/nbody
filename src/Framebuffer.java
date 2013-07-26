@@ -53,6 +53,11 @@ public class Framebuffer {
 		framebufferList.put("pp3", new Framebuffer(render.sizeX, render.sizeY));
 		framebufferList.put("pp4", new Framebuffer(render.sizeX, render.sizeY));
 		framebufferList.put("pp5", new Framebuffer(render.sizeX, render.sizeY));
+		
+		framebufferList.put("blurTemp", new Framebuffer(render.sizeX, render.sizeY));
+		framebufferList.put("blurOut", new Framebuffer(render.sizeX, render.sizeY));
+		
+		framebufferList.put("bloomOut", new Framebuffer(render.sizeX, render.sizeY));
 
 	}
 }

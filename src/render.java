@@ -7,6 +7,7 @@ public class render extends nbody {
 	public static boolean PostProcessEnabled = false;
 	public static boolean PostProcessCube = false;
 	public static boolean PostProcessBloom = false;
+	public static int PostProcessBloomBlurPasses = 2;
 	public static int sizeX = 800;
 	public static int sizeY = 600;
 	public static float ppwhatx = 0;
@@ -72,6 +73,9 @@ public class render extends nbody {
 		Framebuffer.framebufferList.get("pp3").resizeFramebuffer(x, y);
 		Framebuffer.framebufferList.get("pp4").resizeFramebuffer(x, y);
 		Framebuffer.framebufferList.get("pp5").resizeFramebuffer(x, y);
+		Framebuffer.framebufferList.get("blurTemp").resizeFramebuffer(x, y);
+		Framebuffer.framebufferList.get("blurOut").resizeFramebuffer(x, y);
+		Framebuffer.framebufferList.get("bloomOut").resizeFramebuffer(x, y);
 
 	}
 	private static void drawPixel2 (float x , float y, float z, float size){
@@ -305,41 +309,45 @@ public class render extends nbody {
 			GL11.glVertex3f(-1,1, 0.5f);
 		GL11.glEnd();	
 	}
-	
-	private static void Bloom(){
-		switchToOrtho();
-
+	private static Framebuffer Blur(Framebuffer framebuffer, int passes){ //takes framebuffer to blur, returns output framebuffer
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glEnable(GL11.GL_DEPTH_TEST); // depth testing, yo
+		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
+		switchToOrtho();
+		for(int i=0; i < passes; i++){ // todo maybe i can optimize looking up the framebuffers
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("blurTemp").framebufferID);
+			GL20.glUseProgram(Shader.shaders.get("gaush"));
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebuffer.textureID);
+			drawFSQuad();
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("blurOut").framebufferID);
+			GL20.glUseProgram(Shader.shaders.get("gausv"));
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("blurTemp").textureID);
+			drawFSQuad();
+			framebuffer = Framebuffer.framebufferList.get("blurOut");// for returns AND it re-uses it in the next pass
+		}
+		return framebuffer;
 		
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp2").framebufferID);
-		GL20.glUseProgram(Shader.shaders.get("gaush"));
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp1").textureID);
-		drawFSQuad();
-		
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp3").framebufferID);
-		GL20.glUseProgram(Shader.shaders.get("gausv"));
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp2").textureID);
-		drawFSQuad();
-		
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp4").framebufferID);
-		GL20.glUseProgram(Shader.shaders.get("gaush"));
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp3").textureID);
-		drawFSQuad();
+	}
+	private static Framebuffer Bloom(Framebuffer framebuffer, int blurPasses){
+		switchToOrtho();
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_BLEND);
+		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
+		Framebuffer blurred = Blur(framebuffer, blurPasses);
+		Framebuffer output = Framebuffer.framebufferList.get("bloomOut");
+		//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, output).framebufferID);
 		
 		if(PostProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp5").framebufferID);
 		else glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-		GL20.glUseProgram(Shader.shaders.get("gausv"));
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp4").textureID);
-		drawFSQuad();
 		
-		
-		GL11.glEnable(GL11.GL_BLEND);
-		GL20.glUseProgram(0);
 		GL11.glColor3f(1f, 1f, 1f);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp1").textureID);
+		GL20.glUseProgram(0);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, blurred.framebufferID);
 		drawFSQuad();
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebuffer.textureID);
+		drawFSQuad();
+		return output;
 	}
 	private static void PostProcess(){
 		switchToPerspective();
@@ -371,7 +379,7 @@ public class render extends nbody {
 		GL20.glUseProgram(0);
 		
 		switchToPerspective();
-		if(PostProcessEnabled|| PostProcessBloom)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp1").framebufferID);
+		if(PostProcessEnabled || PostProcessBloom)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp1").framebufferID);
 		else glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 		GL11.glClearColor (0.0f, 0.0f, 0.0f, 0.5f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
@@ -380,7 +388,7 @@ public class render extends nbody {
 		camera.AdjustToCamera();
 		drawParticles();
 		
-		if(PostProcessBloom) Bloom();
+		if(PostProcessBloom) Bloom(Framebuffer.framebufferList.get("pp1"), PostProcessBloomBlurPasses);
 		if(PostProcessEnabled){
 			PostProcess();
 		}

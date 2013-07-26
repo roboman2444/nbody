@@ -9,6 +9,6 @@ WASD - move around
 SPACE - pauses simulation
 M - releases or grabs mouse
 ESC - quits
-P - toggles framebuffers
-C - changes framebuffer mode
-B - changes to bloom mode (if P is enabled)
+P - toggles "Postprocess"
+C - changes "PostProcess" mode
+B - toggles bloom
