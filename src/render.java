@@ -6,7 +6,9 @@ import static org.lwjgl.opengl.EXTFramebufferObject.*;
 public class render extends nbody {
 	public static boolean PostProcessEnabled = false;
 	public static boolean PostProcessCube = false;
+	public static boolean CubeProcessEnabled = false;
 	public static boolean PostProcessBloom = false;
+	public static boolean PostProcessFlare = true;
 	public static int PostProcessBloomBlurPasses = 2;
 	public static int sizeX = 800;
 	public static int sizeY = 600;
@@ -29,10 +31,10 @@ public class render extends nbody {
 		//System.out.println("resized to " + sizeX +" " + sizeY);
 	}
 	public static void init () {
-		
+
 		//how do i get a framebuffer by name?
 		//ok
-		
+
 		try {
 			Display.setDisplayMode(new DisplayMode(sizeX,sizeY));
 			Display.create();
@@ -42,18 +44,18 @@ public class render extends nbody {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		
+
 		Shader.initShader();
 		Framebuffer.initFramebuffers();
 		// init OpenGL
-		
+
 		GL11.glDepthFunc(GL11.GL_LEQUAL);
 		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA,GL11.GL_ONE);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glShadeModel (GL11.GL_SMOOTH);
-		
-		
+
+
 		resizeDisplay();
 	}
 	private static void resizeWindow(int x, int y){
@@ -67,7 +69,7 @@ public class render extends nbody {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);                     // Select The Modelview Matrix
 		GL11.glLoadIdentity();                           // Reset The Modelview Matrix
 		GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
-		
+
 		Framebuffer.framebufferList.get("pp1").resizeFramebuffer(x, y);
 		Framebuffer.framebufferList.get("pp2").resizeFramebuffer(x, y);
 		Framebuffer.framebufferList.get("pp3").resizeFramebuffer(x, y);
@@ -76,6 +78,7 @@ public class render extends nbody {
 		Framebuffer.framebufferList.get("blurTemp").resizeFramebuffer(x, y);
 		Framebuffer.framebufferList.get("blurOut").resizeFramebuffer(x, y);
 		Framebuffer.framebufferList.get("bloomOut").resizeFramebuffer(x, y);
+		Framebuffer.framebufferList.get("flareOut").resizeFramebuffer(x, y);
 
 	}
 	private static void drawPixel2 (float x , float y, float z, float size){
@@ -200,7 +203,7 @@ public class render extends nbody {
 	}
 
 	private static void drawRotatingCube(){
-		
+
 		translateCrap(0f, -5f, 0f);
 		rotateCrap(ppwhatx, ppwhaty, 0f);
 		/*
@@ -214,10 +217,10 @@ public class render extends nbody {
 		GL11.glTexCoord2f(0.0f, 1.0f);
 		GL11.glVertex3f(-1,1, 0);
 		GL11.glEnd();
-		*/
-		
+		 */
+
 		GL11.glBegin(GL11.GL_QUADS);
-		
+
 		GL11.glTexCoord2f(0.0f, 0.0f);
 		GL11.glVertex3f(-1,-1, -1);
 		GL11.glTexCoord2f(1.0f, 0.0f);
@@ -226,7 +229,7 @@ public class render extends nbody {
 		GL11.glVertex3f(1,1, -1);
 		GL11.glTexCoord2f(0.0f, 1.0f);
 		GL11.glVertex3f(-1,1, -1);
-		
+
 		GL11.glTexCoord2f(0.0f, 0.0f);
 		GL11.glVertex3f(-1,-1, 1);
 		GL11.glTexCoord2f(1.0f, 0.0f);
@@ -235,8 +238,8 @@ public class render extends nbody {
 		GL11.glVertex3f(1,1, 1);
 		GL11.glTexCoord2f(0.0f, 1.0f);
 		GL11.glVertex3f(-1,1, 1);
-		
-		
+
+
 		GL11.glTexCoord2f(0.0f, 0.0f);
 		GL11.glVertex3f(1,-1, -1);
 		GL11.glTexCoord2f(1.0f, 0.0f);
@@ -245,7 +248,7 @@ public class render extends nbody {
 		GL11.glVertex3f(1,1, 1);
 		GL11.glTexCoord2f(0.0f, 1.0f);
 		GL11.glVertex3f(1,1, -1);
-		
+
 		GL11.glTexCoord2f(0.0f, 0.0f);
 		GL11.glVertex3f(-1,-1, -1);
 		GL11.glTexCoord2f(1.0f, 0.0f);
@@ -255,8 +258,8 @@ public class render extends nbody {
 		GL11.glTexCoord2f(0.0f, 1.0f);
 		GL11.glVertex3f(-1,1, -1);
 
-		
-		
+
+
 		GL11.glTexCoord2f(1.0f, 0.0f);
 		GL11.glVertex3f(1,1, -1);
 		GL11.glTexCoord2f(0.0f, 1.0f);
@@ -265,7 +268,7 @@ public class render extends nbody {
 		GL11.glVertex3f(-1,1, 1);
 		GL11.glTexCoord2f(0.0f, 0.0f);
 		GL11.glVertex3f(-1,1, -1);
-		
+
 		GL11.glTexCoord2f(1.0f, 0.0f);
 		GL11.glVertex3f(1,-1, -1);
 		GL11.glTexCoord2f(1.0f, 1.0f);
@@ -274,13 +277,13 @@ public class render extends nbody {
 		GL11.glVertex3f(-1,-1, 1);
 		GL11.glTexCoord2f(0.0f, 0.0f);
 		GL11.glVertex3f(-1,-1, -1);
-		
-		
-		GL11.glEnd();
-		
-		
 
-/*
+
+		GL11.glEnd();
+
+
+
+		/*
 		GL11.glVertex3f(x +size, y +size, z-size);
 		GL11.glVertex3f(x +size, y +size, z+size);
 		GL11.glVertex3f(x -size, y +size, z+size);
@@ -290,23 +293,23 @@ public class render extends nbody {
 		GL11.glVertex3f(x +size, y -size, z+size);
 		GL11.glVertex3f(x -size, y -size, z+size);
 		GL11.glVertex3f(x -size, y -size, z-size);
-		*/
+		 */
 
 
 	}
-	
+
 	private static void drawFSQuad(){
 		GL11.glLoadIdentity();
 		translateCrap(0f, -2f, 0f);
 		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glTexCoord2f(0.0f, 0.0f);
-			GL11.glVertex3f(-1,-1, 0.5f);
-			GL11.glTexCoord2f(1.0f, 0.0f);
-			GL11.glVertex3f(1,-1, 0.5f);
-			GL11.glTexCoord2f(1.0f, 1.0f);
-			GL11.glVertex3f(1,1, 0.5f);
-			GL11.glTexCoord2f(0.0f, 1.0f);
-			GL11.glVertex3f(-1,1, 0.5f);
+		GL11.glTexCoord2f(0.0f, 0.0f);
+		GL11.glVertex3f(-1,-1, 0.5f);
+		GL11.glTexCoord2f(1.0f, 0.0f);
+		GL11.glVertex3f(1,-1, 0.5f);
+		GL11.glTexCoord2f(1.0f, 1.0f);
+		GL11.glVertex3f(1,1, 0.5f);
+		GL11.glTexCoord2f(0.0f, 1.0f);
+		GL11.glVertex3f(-1,1, 0.5f);
 		GL11.glEnd();	
 	}
 	private static Framebuffer Blur(Framebuffer framebuffer, int passes){ //takes framebuffer to blur, returns output framebuffer
@@ -326,7 +329,7 @@ public class render extends nbody {
 			framebuffer = Framebuffer.framebufferList.get("blurOut");// for returns AND it re-uses it in the next pass
 		}
 		return framebuffer;
-		
+
 	}
 	private static Framebuffer Bloom(Framebuffer framebuffer, int blurPasses){
 		switchToOrtho();
@@ -335,11 +338,11 @@ public class render extends nbody {
 		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
 		Framebuffer blurred = Blur(framebuffer, blurPasses);
 		Framebuffer output = Framebuffer.framebufferList.get("bloomOut");
-		//glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, output).framebufferID);
-		
-		if(PostProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp5").framebufferID);
-		else glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-		
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, output.framebufferID);
+
+		//if(PostProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp5").framebufferID);
+		//else glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
 		GL11.glColor3f(1f, 1f, 1f);
 		GL20.glUseProgram(0);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, blurred.framebufferID);
@@ -349,7 +352,52 @@ public class render extends nbody {
 		drawFSQuad();
 		return output;
 	}
+	private static Framebuffer Flare(Framebuffer framebuffer){
+		switchToOrtho();
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_BLEND);
+		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
+		Framebuffer output = Framebuffer.framebufferList.get("flareOut");
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, output.framebufferID);
+
+		GL11.glColor3f(1f, 1f, 1f);
+		GL20.glUseProgram(Shader.shaders.get("lensflare"));
+		//GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebuffer.textureID);
+		drawFSQuad();
+		return output;
+	}
 	private static void PostProcess(){
+		Framebuffer framebuffer = Framebuffer.framebufferList.get("pp1");
+		if(PostProcessBloom){
+			framebuffer = Bloom(framebuffer, PostProcessBloomBlurPasses); //renders bloom and sets framebuffer to output
+		}
+		if(CubeProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp5").framebufferID);
+		else glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		GL11.glColor3f(1f, 1f, 1f);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_BLEND);
+		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
+		GL20.glUseProgram(0); //standard
+		switchToOrtho();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebuffer.textureID);
+		drawFSQuad();
+		if(PostProcessFlare){
+			//framebuffer = Flare(framebuffer); //renders flare and sets framebuffer to output
+			framebuffer = Flare(Framebuffer.framebufferList.get("blurOut"));
+		}
+		if(CubeProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp5").framebufferID);
+		else glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		GL11.glColor3f(1f, 1f, 1f);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
+		GL20.glUseProgram(0); //standard
+		switchToOrtho();
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebuffer.textureID);
+		drawFSQuad();
+	}
+	private static void CubeProcess(){
 		switchToPerspective();
 		GL11.glColor3f(1f, 1f, 1f);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -357,8 +405,7 @@ public class render extends nbody {
 		GL11.glEnable(GL11.GL_DEPTH_TEST); // depth testing, yo
 		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // backbuffer
 		GL20.glUseProgram(0);
-		if(PostProcessBloom)GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp5").textureID);
-		else GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp1").textureID);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp1").textureID);
 		GL11.glLoadIdentity();
 		if(PostProcessCube){
 			GL11.glClearColor (1.0f, 1.0f, 1.0f, 0.5f);
@@ -371,15 +418,15 @@ public class render extends nbody {
 			GL11.glClear (GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 			drawParticles2();
 		}
-		}
+	}
 	public static void draw() {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_DEPTH_TEST); // depth testing, yo
 		GL20.glUseProgram(0);
-		
+
 		switchToPerspective();
-		if(PostProcessEnabled || PostProcessBloom)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp1").framebufferID);
+		if(PostProcessEnabled || CubeProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp1").framebufferID);
 		else glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 		GL11.glClearColor (0.0f, 0.0f, 0.0f, 0.5f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
@@ -387,14 +434,18 @@ public class render extends nbody {
 		GL11.glLoadIdentity();// again, for shitsngiggles
 		camera.AdjustToCamera();
 		drawParticles();
-		
-		if(PostProcessBloom) Bloom(Framebuffer.framebufferList.get("pp1"), PostProcessBloomBlurPasses);
+
 		if(PostProcessEnabled){
 			PostProcess();
 		}
+		if(CubeProcessEnabled){
+			CubeProcess();
+		}
+		
+
 		if(Display.wasResized())resizeDisplay();
 		Display.update();
-		
+
 
 	}
 

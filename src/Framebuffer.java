@@ -73,6 +73,7 @@ public class Framebuffer {
 		framebufferList.put("blurOut", new Framebuffer(render.sizeX, render.sizeY, false));
 
 		framebufferList.put("bloomOut", new Framebuffer(render.sizeX, render.sizeY, false));
+		framebufferList.put("flareOut", new Framebuffer(render.sizeX, render.sizeY, false));
 
 	}
 }
