@@ -5,7 +5,6 @@ import static org.lwjgl.opengl.EXTFramebufferObject.*;
 
 public class render extends nbody {
 	public static boolean PostProcessEnabled = false;
-	public static boolean PostProcessCube = false;
 	public static boolean CubeProcessEnabled = false;
 	public static boolean PostProcessBloom = false;
 	public static boolean PostProcessFlare = true;
@@ -70,76 +69,12 @@ public class render extends nbody {
 		GL11.glLoadIdentity();                           // Reset The Modelview Matrix
 		GL11.glHint(GL11.GL_PERSPECTIVE_CORRECTION_HINT, GL11.GL_NICEST);
 
-		Framebuffer.framebufferList.get("pp1").resizeFramebuffer(x, y);
-		Framebuffer.framebufferList.get("pp2").resizeFramebuffer(x, y);
-		Framebuffer.framebufferList.get("pp3").resizeFramebuffer(x, y);
-		Framebuffer.framebufferList.get("pp4").resizeFramebuffer(x, y);
-		Framebuffer.framebufferList.get("pp5").resizeFramebuffer(x, y);
+		Framebuffer.framebufferList.get("renderOut").resizeFramebuffer(x, y);
 		Framebuffer.framebufferList.get("blurTemp").resizeFramebuffer(x, y);
 		Framebuffer.framebufferList.get("blurOut").resizeFramebuffer(x, y);
 		Framebuffer.framebufferList.get("bloomOut").resizeFramebuffer(x, y);
 		Framebuffer.framebufferList.get("flareOut").resizeFramebuffer(x, y);
 
-	}
-	private static void drawPixel2 (float x , float y, float z, float size){
-		GL11.glBegin(GL11.GL_QUADS);
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(x -size, y -size, z + size);
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(x +size, y -size, z + size);
-		GL11.glTexCoord2f(1.0f, 1.0f);
-		GL11.glVertex3f(x +size, y +size, z + size);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(x -size, y +size, z + size);
-
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(x -size, y -size, z - size);
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(x +size, y -size, z - size);
-		GL11.glTexCoord2f(1.0f, 1.0f);
-		GL11.glVertex3f(x +size, y +size, z - size);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(x -size, y +size, z - size);
-
-
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(x +size, y -size, z-size);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(x +size, y -size, z+size);
-		GL11.glTexCoord2f(1.0f, 1.0f);
-		GL11.glVertex3f(x +size, y +size, z+size);
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(x +size, y +size, z-size);
-
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(x -size, y -size, z-size);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(x -size, y -size, z+size);
-		GL11.glTexCoord2f(1.0f, 1.0f);
-		GL11.glVertex3f(x -size, y +size, z+size);
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(x -size, y +size, z-size);
-
-
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(x +size, y +size, z-size);
-		GL11.glTexCoord2f(1.0f, 1.0f);
-		GL11.glVertex3f(x +size, y +size, z+size);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(x -size, y +size, z+size);
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(x -size, y +size, z-size);
-
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(x +size, y -size, z-size);
-		GL11.glTexCoord2f(1.0f, 1.0f);
-		GL11.glVertex3f(x +size, y -size, z+size);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(x -size, y -size, z+size);
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(x -size, y -size, z-size);
-
-		GL11.glEnd();
 	}
 	private static void drawPixel (float x , float y, float z, float r, float g, float b, float size){
 		GL11.glColor3f(r,g,b);
@@ -180,8 +115,6 @@ public class render extends nbody {
 	}
 	private static void drawParticles(){
 		//ARBShaderObjects.glUseProgramObjectARB(Shader.shaders.get("shader"));
-
-
 		for(int i=0; i<numberofparticles; i++){
 			drawPixel(ParticleArray.posx[i], ParticleArray.posy[i], ParticleArray.posz[i],
 					ParticleArray.colr[i], 
@@ -189,114 +122,8 @@ public class render extends nbody {
 					ParticleArray.colb[i], 
 					0.01f * (float)Math.sqrt(ParticleArray.mass[i]));
 		}
-
 	}
-	private static void drawParticles2(){
-		//ARBShaderObjects.glUseProgramObjectARB(Shader.shaders.get("shader"));
-
-
-		for(int i=0; i<numberofparticles; i++){
-			drawPixel2(ParticleArray.posx[i], ParticleArray.posy[i], ParticleArray.posz[i],
-					0.01f * (float)Math.sqrt(ParticleArray.mass[i]));
-		}
-
-	}
-
-	private static void drawRotatingCube(){
-
-		translateCrap(0f, -5f, 0f);
-		rotateCrap(ppwhatx, ppwhaty, 0f);
-		/*
-		GL11.glBegin(GL11.GL_QUADS);
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(-1,-1, 0);
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(1,-1, 0);
-		GL11.glTexCoord2f(1.0f, 1.0f);
-		GL11.glVertex3f(1,1, 0);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(-1,1, 0);
-		GL11.glEnd();
-		 */
-
-		GL11.glBegin(GL11.GL_QUADS);
-
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(-1,-1, -1);
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(1,-1, -1);
-		GL11.glTexCoord2f(1.0f, 1.0f);
-		GL11.glVertex3f(1,1, -1);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(-1,1, -1);
-
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(-1,-1, 1);
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(1,-1, 1);
-		GL11.glTexCoord2f(1.0f, 1.0f);
-		GL11.glVertex3f(1,1, 1);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(-1,1, 1);
-
-
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(1,-1, -1);
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(1,-1, +1);
-		GL11.glTexCoord2f(1.0f, 1.0f);
-		GL11.glVertex3f(1,1, 1);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(1,1, -1);
-
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(-1,-1, -1);
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(-1,-1, +1);
-		GL11.glTexCoord2f(1.0f, 1.0f);
-		GL11.glVertex3f(-1,1, 1);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(-1,1, -1);
-
-
-
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(1,1, -1);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(1,1, 1);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(-1,1, 1);
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(-1,1, -1);
-
-		GL11.glTexCoord2f(1.0f, 0.0f);
-		GL11.glVertex3f(1,-1, -1);
-		GL11.glTexCoord2f(1.0f, 1.0f);
-		GL11.glVertex3f(1,-1, 1);
-		GL11.glTexCoord2f(0.0f, 1.0f);
-		GL11.glVertex3f(-1,-1, 1);
-		GL11.glTexCoord2f(0.0f, 0.0f);
-		GL11.glVertex3f(-1,-1, -1);
-
-
-		GL11.glEnd();
-
-
-
-		/*
-		GL11.glVertex3f(x +size, y +size, z-size);
-		GL11.glVertex3f(x +size, y +size, z+size);
-		GL11.glVertex3f(x -size, y +size, z+size);
-		GL11.glVertex3f(x -size, y +size, z-size);
-
-		GL11.glVertex3f(x +size, y -size, z-size);
-		GL11.glVertex3f(x +size, y -size, z+size);
-		GL11.glVertex3f(x -size, y -size, z+size);
-		GL11.glVertex3f(x -size, y -size, z-size);
-		 */
-
-
-	}
+	
 
 	private static void drawFSQuad(){
 		GL11.glLoadIdentity();
@@ -368,12 +195,11 @@ public class render extends nbody {
 		return output;
 	}
 	private static void PostProcess(){
-		Framebuffer framebuffer = Framebuffer.framebufferList.get("pp1");
+		Framebuffer framebuffer = Framebuffer.framebufferList.get("renderOut");
 		if(PostProcessBloom){
 			framebuffer = Bloom(framebuffer, PostProcessBloomBlurPasses); //renders bloom and sets framebuffer to output
 		}
-		if(CubeProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp5").framebufferID);
-		else glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 		GL11.glColor3f(1f, 1f, 1f);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_BLEND);
@@ -386,8 +212,7 @@ public class render extends nbody {
 			//framebuffer = Flare(framebuffer); //renders flare and sets framebuffer to output
 			framebuffer = Flare(Framebuffer.framebufferList.get("blurOut"));
 		}
-		if(CubeProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp5").framebufferID);
-		else glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 		GL11.glColor3f(1f, 1f, 1f);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_BLEND);
@@ -397,28 +222,6 @@ public class render extends nbody {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, framebuffer.textureID);
 		drawFSQuad();
 	}
-	private static void CubeProcess(){
-		switchToPerspective();
-		GL11.glColor3f(1f, 1f, 1f);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glEnable(GL11.GL_DEPTH_TEST); // depth testing, yo
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // backbuffer
-		GL20.glUseProgram(0);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, Framebuffer.framebufferList.get("pp1").textureID);
-		GL11.glLoadIdentity();
-		if(PostProcessCube){
-			GL11.glClearColor (1.0f, 1.0f, 1.0f, 0.5f);
-			GL11.glClear (GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-			drawRotatingCube();
-		}
-		else{
-			camera.AdjustToCamera();
-			GL11.glClearColor (0.0f, 0.0f, 0.0f, 0.5f);
-			GL11.glClear (GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-			drawParticles2();
-		}
-	}
 	public static void draw() {
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_BLEND);
@@ -426,7 +229,7 @@ public class render extends nbody {
 		GL20.glUseProgram(0);
 
 		switchToPerspective();
-		if(PostProcessEnabled || CubeProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("pp1").framebufferID);
+		if(PostProcessEnabled)glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, Framebuffer.framebufferList.get("renderOut").framebufferID);
 		else glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 		GL11.glClearColor (0.0f, 0.0f, 0.0f, 0.5f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
@@ -437,9 +240,6 @@ public class render extends nbody {
 
 		if(PostProcessEnabled){
 			PostProcess();
-		}
-		if(CubeProcessEnabled){
-			CubeProcess();
 		}
 		
 

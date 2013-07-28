@@ -9,6 +9,5 @@ WASD - move around
 SPACE - pauses simulation
 M - releases or grabs mouse
 ESC - quits
-P - toggles "Postprocess"
-C - changes "PostProcess" mode
-B - toggles bloom
+P - toggles Postprocess
+B - toggles bloom and lensflare

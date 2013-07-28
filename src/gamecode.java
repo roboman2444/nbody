@@ -62,7 +62,7 @@ public class gamecode {
 		
 		if(input.keyC){
 			if(cReleased){
-				render.PostProcessCube = !render.PostProcessCube;
+
 			}
 			cReleased = false;
 		} else cReleased = true;

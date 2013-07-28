@@ -63,11 +63,8 @@ public class Framebuffer {
 
 	}
 	public static void initFramebuffers(){
-		framebufferList.put("pp1", new Framebuffer(render.sizeX, render.sizeY, true));
-		framebufferList.put("pp2", new Framebuffer(render.sizeX, render.sizeY, false));
-		framebufferList.put("pp3", new Framebuffer(render.sizeX, render.sizeY, false));
-		framebufferList.put("pp4", new Framebuffer(render.sizeX, render.sizeY, false));
-		framebufferList.put("pp5", new Framebuffer(render.sizeX, render.sizeY, false));
+		framebufferList.put("renderOut", new Framebuffer(render.sizeX, render.sizeY, true));
+
 
 		framebufferList.put("blurTemp", new Framebuffer(render.sizeX, render.sizeY, false));
 		framebufferList.put("blurOut", new Framebuffer(render.sizeX, render.sizeY, false));
