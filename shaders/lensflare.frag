@@ -5,9 +5,9 @@ varying vec2 texCoord;
         uniform float                   FlareDispersal = 0.5;
         uniform vec3                    FlareRadialThreshold = vec3(0.4);
         uniform vec3                    FlareHaloThreshold = vec3(0.4);
-        uniform float                   FlareHalo = 0.2;
+        uniform float                   FlareHalo = 0.7;
         uniform float                   FlareRadial = 0.2;
-        uniform float                   FlareHaloWidth = 0.55;
+        uniform float                   FlareHaloWidth = 0.5;
         uniform vec3                    FlareChroma = vec3(-0.01, 0., 0.01);
         vec3 ChromaTextureDistorted(in sampler2D tex, in vec2 sample_center, in vec2 sample_vector, in vec3 distortion) {
                 return vec3(    texture2D(tex, sample_center + sample_vector * distortion.r).r,
@@ -24,6 +24,10 @@ void main(){
         vec2    FlareTexCoord   =       FlipTexCoord(texCoord);
         vec2    sample_vector   =       (vec2(0.5) - FlareTexCoord) * FlareDispersal;
 
+	float weight = length(vec2(0.5) - fract(texCoord + vec2(0.5))) / length(vec2(0.5));
+	weight = pow(1.0 - weight, 5.0);
+
+
         if(FlareRadial != 0){
                 for (int i = 0; i < FlareSamples; ++i) {
                         vec2 offset   = sample_vector * float(i);
@@ -37,9 +41,9 @@ void main(){
         if(FlareHalo != 0){
                 vec2    halo_vector     = normalize(sample_vector) * FlareHaloWidth;
                 if(FlareChroma != 0.0){
-                        gl_FragColor += vec4(clamp(ChromaTextureDistorted(texture, FlareTexCoord + halo_vector, halo_vector, FlareChroma)        - FlareHaloThreshold, 0,1) *FlareHalo , 1);
+                        gl_FragColor += vec4(clamp(ChromaTextureDistorted(texture, FlareTexCoord + halo_vector, halo_vector, FlareChroma)        - FlareHaloThreshold, 0,1) *FlareHalo * weight, 1);
                 } else {
-                        gl_FragColor += clamp(texture2D(texture, FlareTexCoord + halo_vector)      - vec4(FlareHaloThreshold,1), 0,1) *FlareHalo;
+                        gl_FragColor += clamp(texture2D(texture, FlareTexCoord + halo_vector)      - vec4(FlareHaloThreshold,1), 0,1) *FlareHalo * weight;
                 }
         }
 
